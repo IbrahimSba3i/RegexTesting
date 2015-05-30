@@ -2,8 +2,10 @@
 #include "QuantifiedRegexObject.h"
 
 class Regex;
+class Expression;
 class ConcatenationObject
 {
+	friend class Expression;
 	vector<QuantifiedRegexObject*> objectsList;
 	pair<int, int> capturedRange;
 	bool matched;

@@ -74,6 +74,9 @@ bool Expression::matches(Regex* rgx)
 	{
 		if (objectsList[i]->matches(rgx))
 		{
+			//rgx->matchGroups.push_back(rgx->matchString.source.substr(objectsList[i]->capturedRange.first, objectsList[i]->capturedRange.second - objectsList[i]->capturedRange.first));
+			if (isCapturingGroup)
+				rgx->matchedRanges.push_back(make_pair(objectsList[i]->capturedRange.first, -(objectsList[i]->capturedRange.second - objectsList[i]->capturedRange.first)));
 			return true;
 		}
 	}

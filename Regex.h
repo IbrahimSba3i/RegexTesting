@@ -1,11 +1,13 @@
 #pragma once
 #include "ParseString.h"
 #include "Expression.h"
+#include <algorithm>
 
 class Regex
 {
 	std::string value;
 	
+	vector<pair<int, int> > matchedRanges;
 	vector<string> matchGroups;
 	
 	ParseString src;
@@ -62,6 +64,64 @@ public:
 	{
 		if (!compiled) throw exception("");
 		matchString = other;
-		return exp.matches(this) && matchString.isDone();
+		
+		matchGroups.clear();
+		matchedRanges.clear();
+
+		bool result = exp.matches(this) && matchString.isDone();
+
+		sort(matchedRanges.begin(), matchedRanges.end());
+		for (int i = 0; i < matchedRanges.size(); i++)
+			matchGroups.push_back(other.substr(matchedRanges[i].first, -matchedRanges[i].second));
+
+		return result;
+	}
+
+	size_t search(const string& other)
+	{
+		if (!compiled) throw exception("");
+		matchString = other;
+		matchGroups.clear();
+
+		for (int i = 0; i < other.length(); i++)
+		{
+			matchedRanges.clear();
+			matchString.setCurrent(i);
+			if (exp.matches(this))
+			{
+				sort(matchedRanges.begin(), matchedRanges.end());
+				for (int i = 0; i < matchedRanges.size(); i++)
+					matchGroups.push_back(other.substr(matchedRanges[i].first, -matchedRanges[i].second));
+				return i;
+			}
+		}
+		return string::npos;
+	}
+
+	bool contains(const string& other)
+	{
+		return (search(other) != string::npos);
+	}
+
+	int matchGroupsCount() const
+	{
+		return matchGroups.size();
+	}
+
+	const string& group(size_t index = 0) const
+	{
+		if (index >= matchGroups.size())
+			throw out_of_range("Match group out of range");
+		return matchGroups[index];
+	}
+
+	const string& cap(size_t index = 0) const
+	{
+		return group(index);
+	}
+
+	const string& operator[](size_t index) const
+	{
+		return group(index);
 	}
 };
